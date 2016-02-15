@@ -1,3 +1,94 @@
-hola
+# Dexter Industries
+# Initial Date: June 24, 2013
+# Last Updated: August 13, 2014
+#
+# These files have been made available online through a Creative Commons Attribution-ShareAlike 3.0  license.
+# (http://creativecommons.org/licenses/by-sa/3.0/)
+#
+# http://www.dexterindustries.com/BrickPi
+# This code is for testing the    #import BrickPi.py file to use BrickPi operations
 
-word
+
+from BrickPi import *
+try:
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    print "Error importing RPi.GPIO. You need to run this with superuser privileges. Try sudo python LED.py"
+
+import time
+import pygame
+pygame.init()
+
+delay = 0.1
+
+#GPIO.setmode(GPIO.BOARD)
+#GPIO.setup(12, GPIO.OUT)    #GPIO 18
+#GPIO.setup(13, GPIO.OUT)    #GPIO 27
+
+BrickPiSetup()  # setup the serial port for communication
+
+BrickPi.MotorEnable[PORT_A] = 1 #Enable the Motor A
+BrickPi.MotorEnable[PORT_B] = 1 #Enable the Motor B
+BrickPi.MotorEnable[PORT_C] = 1 #Enable the Motor A
+BrickPi.MotorEnable[PORT_D] = 1 #Enable the Motor B
+
+BrickPiSetupSensors()   #Send the properties of sensors to BrickPi
+
+power = 0
+UP = 'up'
+DOWN = 'down'
+LEFT = 'left'
+RIGHT = 'right'
+
+direction = UP
+
+while True:
+    for event in pygame.event.get(): # event handling loop
+        if event.type == QUIT:
+            terminate()
+        elif event.type == KEYDOWN:
+            if (event.key == K_LEFT or event.key == K_a) and direction != RIGHT:
+                direction = LEFT
+            elif (event.key == K_RIGHT or event.key == K_d) and direction != LEFT:
+                direction = RIGHT
+            elif (event.key == K_UP or event.key == K_w) and direction != DOWN:
+                direction = UP
+            elif (event.key == K_DOWN or event.key == K_s) and direction != UP:
+                direction = DOWN
+            elif event.key == K_ESCAPE:
+                terminate()
+
+    if direction == UP:
+        power = 200       
+        BrickPi.MotorSpeed[PORT_B] = power
+        BrickPi.MotorSpeed[PORT_C] = power
+    elif direction == DOWN:
+        power = -200
+        BrickPi.MotorSpeed[PORT_B] = power
+        BrickPi.MotorSpeed[PORT_C] = power   
+    elif direction == LEFT:
+        power = 200
+        BrickPi.MotorSpeed[PORT_C] = power
+        power = 0
+        BrickPi.MotorSpeed[PORT_B] = power 
+    elif direction == RIGHT:
+        power = 200
+        BrickPi.MotorSpeed[PORT_B] = power 
+        power = 0
+        BrickPi.MotorSpeed[PORT_C] = power 
+        
+
+#    ot = time.time()
+ #   while(time.time() - ot < 3):    #running while loop for 3 seconds
+        BrickPiUpdateValues()       # Ask BrickPi to update values for sensors/motors
+  #      GPIO.output(12, True)
+   #     GPIO.output(13, False)
+    #    time.sleep(.1)
+
+#    ot = time.time()
+ #   while(time.time() - ot < 3):    #running while loop for 3 seconds
+  #      BrickPiUpdateValues()       # Ask BrickPi to update values for sensors/motors
+   #     GPIO.output(12, False)
+    #    GPIO.output(13, True)
+        #time.sleep(delay)
+     #   time.sleep(.1)              # sleep for 100 ms
